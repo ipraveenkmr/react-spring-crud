@@ -3,11 +3,15 @@ import axios from 'axios';
 
 function App() {
   const [items, setItems] = useState([]);
-  const [newItem, setNewItem] = useState('');
+  const [newName, setNewName] = useState('');
+  const [department, setDepartment] = useState('');
+  const [salary, setSalary] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);
-  const [editingText, setEditingText] = useState('');
+  const [editingTextName, setEditingTextName] = useState('');
+  const [editingTextDept, setEditingTextDept] = useState('');
+  const [editingTextSalary, setEditingTextSalary] = useState('');
 
-  const API_URL = 'http://localhost:5000/items';
+  const API_URL = 'http://localhost:8080/api/employees';
 
   const fetchItems = async () => {
     try {
@@ -23,11 +27,13 @@ function App() {
   }, []);
 
   const addItem = async () => {
-    if (newItem.trim()) {
+    if (newName.trim()) {
       try {
-        const response = await axios.post(API_URL, { name: newItem });
+        const response = await axios.post(API_URL, { name: newName, department: department, salary: salary });
         setItems([...items, response.data]);
-        setNewItem('');
+        setNewName('');
+        setDepartment('');
+        setSalary('');
       } catch (error) {
         console.error('Error adding item:', error);
       }
@@ -45,17 +51,21 @@ function App() {
 
   const editItem = (index) => {
     setEditingIndex(index);
-    setEditingText(items[index].name);
+    setEditingTextName(items[index].name);
+    setEditingTextDept(items[index].department);
+    setEditingTextSalary(items[index].salary);
   };
 
   const updateItem = async (id) => {
-    const updatedItem = { name: editingText };
+    const updatedItem = { name: editingTextName, department: editingTextDept, salary: editingTextSalary };
     try {
       const response = await axios.put(`${API_URL}/${id}`, updatedItem);
       const updatedItems = items.map((item, index) => (index === editingIndex ? response.data : item));
       setItems(updatedItems);
       setEditingIndex(null);
-      setEditingText('');
+      editingTextName('');
+      editingTextDept('');
+      editingTextSalary('');
     } catch (error) {
       console.error('Error updating item:', error);
     }
@@ -63,16 +73,30 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-5">
-      <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full">
+      <div className="bg-white shadow-md rounded-lg p-6 max-w-[60vw] w-full">
         <h1 className="text-2xl font-bold text-center mb-4">CRUD App in React</h1>
 
         {/* Add Item */}
         <div className="flex items-center space-x-2 mb-4">
           <input
             type="text"
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-            placeholder="Enter new item"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Enter name"
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="text"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            placeholder="Enter department"
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="number"
+            value={salary}
+            onChange={(e) => setSalary(e.target.value)}
+            placeholder="Enter salary"
             className="border p-2 rounded w-full"
           />
           <button onClick={addItem} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -85,14 +109,36 @@ function App() {
           {items.map((item, index) => (
             <li key={item.id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
               {editingIndex === index ? (
-                <input
-                  type="text"
-                  value={editingText}
-                  onChange={(e) => setEditingText(e.target.value)}
-                  className="border p-2 rounded w-full"
-                />
+                <>
+                  <input
+                    type="text"
+                    value={editingTextName}
+                    onChange={(e) => setEditingTextName(e.target.value)}
+                    placeholder="Enter name"
+                    className="border p-2 rounded w-full"
+                  />
+                  <input
+                    type="text"
+                    value={editingTextDept}
+                    onChange={(e) => setEditingTextDept(e.target.value)}
+                    placeholder="Enter department"
+                    className="border p-2 rounded w-full"
+                  />
+                  <input
+                    type="number"
+                    value={editingTextSalary}
+                    onChange={(e) => setEditingTextSalary(e.target.value)}
+                    placeholder="Enter salary"
+                    className="border p-2 rounded w-full"
+                  />
+                </>
+
               ) : (
-                <span>{item.name}</span>
+                <>
+                  <span className='mr-1'>{item.name}</span>
+                  <span className='mr-1'>{item.department}</span>
+                  <span>{item.salary}</span>
+                </>
               )}
 
               <div className="space-x-2 flex">
